@@ -25,7 +25,7 @@ public class Bot extends TelegramLongPollingBot {
     private final String token;
 
     public Bot() {
-        token = System.getenv("8116300606:AAHJOoe6UOhv0csys4IJkvJMyfltYQxRJGQ");
+        token = System.getenv("");
         if (token == null || token.isEmpty()) {
             throw new RuntimeException("❌ BOT_TOKEN переменная окружения не установлена!");
         }
