@@ -10,7 +10,6 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -23,6 +22,15 @@ public class Bot extends TelegramLongPollingBot {
     private InlineKeyboardMarkup keyboardM1;
     private InlineKeyboardMarkup keyboardM2;
 
+    private final String token;
+
+    public Bot() {
+        token = System.getenv("8116300606:AAHJOoe6UOhv0csys4IJkvJMyfltYQxRJGQ");
+        if (token == null || token.isEmpty()) {
+            throw new RuntimeException("❌ BOT_TOKEN переменная окружения не установлена!");
+        }
+    }
+
     @Override
     public String getBotUsername() {
         return "AnnaBaxBot";
@@ -30,13 +38,12 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public String getBotToken() {
-        return "8116300606:AAEeo-W9cp50iG7pF0q8vPFp_oTit1FsGis"; // Замени на свой токен
+        return token;
     }
 
     @Override
     public void onUpdateReceived(Update update) {
         try {
-            // Обработка inline кнопок
             if (update.hasCallbackQuery()) {
                 CallbackQuery callback = update.getCallbackQuery();
                 String data = callback.getData();
@@ -47,7 +54,6 @@ public class Bot extends TelegramLongPollingBot {
                 return;
             }
 
-            // Обработка обычных сообщений
             if (update.hasMessage() && update.getMessage().hasText()) {
                 Message msg = update.getMessage();
                 String text = msg.getText();
@@ -66,21 +72,15 @@ public class Bot extends TelegramLongPollingBot {
                     case "/menu":
                         sendTextWithKeyboard(chatId, "Выберите пункт меню:", getReplyKeyboard());
                         break;
-
-                    
-
                     case "Главное меню":
                         sendText(chatId, "Это главное меню.");
                         break;
-
                     case "О нас":
                         sendText(chatId, "Мы — команда разработчиков Telegram-ботов.");
                         break;
-
                     case "Контакты":
                         sendText(chatId, "Связаться с нами: https://t.me/Baxa_A");
                         break;
-
                     default:
                         sendText(chatId, "Вы написали: " + text);
                 }
@@ -91,17 +91,23 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-
-
     private void initInlineKeyboards() {
-		// TODO Auto-generated method stub
-		
-	}
+        InlineKeyboardButton next = InlineKeyboardButton.builder().text("➡ Далее").callbackData("next").build();
+        InlineKeyboardButton back = InlineKeyboardButton.builder().text("⬅ Назад").callbackData("back").build();
 
-	private ReplyKeyboardMarkup getReplyKeyboard() {
+        List<List<InlineKeyboardButton>> rows1 = new ArrayList<>();
+        rows1.add(List.of(next));
+        keyboardM1 = InlineKeyboardMarkup.builder().keyboard(rows1).build();
+
+        List<List<InlineKeyboardButton>> rows2 = new ArrayList<>();
+        rows2.add(List.of(back));
+        keyboardM2 = InlineKeyboardMarkup.builder().keyboard(rows2).build();
+    }
+
+    private ReplyKeyboardMarkup getReplyKeyboard() {
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
         keyboardMarkup.setResizeKeyboard(true);
-        keyboardMarkup.setOneTimeKeyboard(false); // Клавиатура скроется после нажатия
+        keyboardMarkup.setOneTimeKeyboard(false);
 
         List<KeyboardRow> rows = new ArrayList<>();
 
@@ -144,8 +150,8 @@ public class Bot extends TelegramLongPollingBot {
         execute(newTxt);
         execute(newKb);
     }
- // обычный текст без клавиатуры
-    public void sendText(Long who, String what){
+
+    public void sendText(Long who, String what) {
         SendMessage sm = SendMessage.builder()
                 .chatId(who.toString())
                 .text(what)
@@ -157,8 +163,7 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    // текст + клавиатура
-    public void sendTextWithKeyboard(Long who, String what, ReplyKeyboardMarkup keyboard){
+    public void sendTextWithKeyboard(Long who, String what, ReplyKeyboardMarkup keyboard) {
         SendMessage sm = SendMessage.builder()
                 .chatId(who.toString())
                 .text(what)
@@ -170,8 +175,6 @@ public class Bot extends TelegramLongPollingBot {
             throw new RuntimeException(e);
         }
     }
-
-   
 
     public void copyMessage(Long who, Integer msgId) {
         CopyMessage cm = CopyMessage.builder()
@@ -187,11 +190,10 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     public static void main(String[] args) throws TelegramApiException {
-    	TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
+        TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
         Bot bot = new Bot();
         botsApi.registerBot(bot);
         System.out.println("🤖 Бот запущен успешно!");
-        
     }
 }
 
