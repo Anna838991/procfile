@@ -1,0 +1,1 @@
+worker: java -jar target/BotTutorial-1.0-SNAPSHOT.jar
